@@ -1,18 +1,20 @@
-import React, { Fragment } from 'react'
-import './App.css'
-//components
-import Transfer from './components/transfer/index.jsx'
-import ListTransfer from './components/list_transfer/index.jsx'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './layout/Layout';
+import Home from './pages/Home';
+import AllTransactions from './pages/AllTransactions';
 
 function App() {
   return (
-      <Fragment>
-        <div className="container">
-          <Transfer/>
-          <ListTransfer/>
-        </div>
-      </Fragment>
-  )
+    <Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/transactions" element={<AllTransactions />} />
+          {/* Add Ledger route later */}
+        </Routes>
+      </Layout>
+    </Router>
+  );
 }
 
-export default App
+export default App;

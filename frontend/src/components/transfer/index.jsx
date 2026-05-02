@@ -13,9 +13,9 @@ function Transfer() {
     e.preventDefault();
     try {
       const body = { from_account: Number(selectedFromAccount), to_account: Number(selectedToAccount), amount, description }
-      const response = await axios.post('http://localhost:3000/transaction', body)
+      const response = await axios.post('http://localhost:3000/transactions', body)
       if (response.status === 400) {
-        alert(response.data.error)
+        alert(response.data.error);
         return;
       }
       else if (response.status === 500) {
