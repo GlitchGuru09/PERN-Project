@@ -37,10 +37,9 @@ function ListTransfer() {
             <table className="table mt-5 text-center">
                 <thead>
                     <tr>
-                        <th scope="col">Id</th>
-                        <th scope="col">Account Name</th>
+                        <th scope="col">From Account</th>
+                        <th scope="col">To Account</th>
                         <th scope="col">Amount</th>
-                        <th scope="col">Transaction Type</th>
                         <th scope="col">Status</th>
                         <th scope="col">Edit</th>
                         <th scope="col">Delete</th>
@@ -49,10 +48,9 @@ function ListTransfer() {
                 <tbody>
                     {tran.map( t => (
                         <tr key={t.tid}>
-                            <td>{t.tid}</td>
-                            <td>{t.account_name}</td>
+                            <td>{t.from_account_name}</td>
+                            <td>{t.to_account_name}</td>
                             <td>{t.amount}</td>
-                            <td>{t.transaction_type}</td>
                             <td>{t.status}</td>
                             {/* <td><EditTodo todo={todo} /></td> */}
                             <td>

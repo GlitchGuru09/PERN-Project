@@ -16,12 +16,27 @@ app.use(express.json());
 //create a transaction
 app.post('/transaction', async (req, res) => {
   try {
-    const { account, amount, description, transaction_type, status } = req.body;
+    const { from_account, to_account, amount, description } = req.body;
     const transaction = await pool.query(
-      'INSERT INTO transactions (ac_id,amount,description, transaction_type, status) VALUES($1,$2,$3,$4,$5) RETURNING *',
-      [account, amount, description, transaction_type, status]
+      'INSERT INTO transactions (from_ac_id, to_ac_id, amount, description, status) VALUES($1,$2,$3,$4,$5) RETURNING *',
+      [from_account, to_account, amount, description, 'PENDING']
     );
-    if(!account || !amount || !description || !transaction_type || !status) {
+    if (transaction){
+      //update balance of from account
+      await pool.query('UPDATE accounts SET balance = balance - $1 WHERE ac_id = $2', [amount, from_account]);
+      //update balance of to account
+      await pool.query('UPDATE accounts SET balance = balance + $1 WHERE ac_id = $2', [amount, to_account]);
+    }
+
+    //fetch updated balance of from account
+      const fromAccountBalance = await pool.query('SELECT balance FROM accounts WHERE ac_id = $1', [from_account]);
+      //fetch updated balance of to account
+      const toAccountBalance = await pool.query('SELECT balance FROM accounts WHERE ac_id = $1', [to_account]);
+
+    //Update ledger table
+    await pool.query('INSERT INTO ledger (tid, ac_id, entry_type, amount, balance_after, currency) VALUES ($1, $2, $3, $4, $5, $6)', [transaction.rows[0].tid, from_account, 'debit', amount, fromAccountBalance.rows[0].balance, 'INR']);
+    await pool.query('INSERT INTO ledger (tid, ac_id, entry_type, amount, balance_after, currency) VALUES ($1, $2, $3, $4, $5, $6)', [transaction.rows[0].tid, to_account, 'credit', amount, toAccountBalance.rows[0].balance, 'INR']);
+    if(!from_account || !to_account || !amount ||  !description) {
       return res.status(400).json({ error: 'Please fill all the fields' });
     }
     res.json(transaction.rows[0]);
@@ -35,7 +50,7 @@ app.post('/transaction', async (req, res) => {
 //get all   transactions
 app.get('/transactions', async (req, res) => {
   try {
-    const allTransactions = await pool.query('SELECT * FROM transactions join accounts a on transactions.ac_id = a.ac_id');
+    const allTransactions = await pool.query('SELECT tid, amount, status, a.account_name AS from_account_name, b.account_name AS to_account_name FROM transactions t JOIN accounts a ON t.from_ac_id = a.ac_id JOIN accounts b ON t.to_ac_id = b.ac_id');
     res.json(allTransactions.rows);
   } catch (error) {
     console.error(error.message);
