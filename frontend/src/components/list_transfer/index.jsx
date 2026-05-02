@@ -10,9 +10,10 @@ function ListTransfer() {
             const response = await axios.get('http://localhost:3000/transactions')
             // console.log(response.data)
             setTran(response.data);
-            
+
         } catch (error) {
-            console.log(error.message)
+            const message = error?.response?.data?.error || 'Server error'
+            showToast(message, 'danger')
         }
     }
 
@@ -30,7 +31,7 @@ function ListTransfer() {
 
     useEffect(() => {
         getTransactions();
-    },[])
+    }, [])
 
     return (
         <Fragment>
@@ -46,7 +47,7 @@ function ListTransfer() {
                     </tr>
                 </thead>
                 <tbody>
-                    {tran.map( t => (
+                    {tran.map(t => (
                         <tr key={t.tid}>
                             <td>{t.from_account_name}</td>
                             <td>{t.to_account_name}</td>

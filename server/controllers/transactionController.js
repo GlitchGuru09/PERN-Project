@@ -1,4 +1,5 @@
-const pool = require('../db');
+const pool = require('../config/db');
+const { logError, logSuccess } = require('../services/errorLogger');
 
 const createTransaction = async (req, res) => {
   const { from_account, to_account, amount, description } = req.body;
@@ -39,9 +40,10 @@ const createTransaction = async (req, res) => {
 
     await client.query('COMMIT');
     res.json(transactionResult.rows[0]);
+    await logSuccess('Transaction created successfully', req);
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error(error.message);
+    await logError(error, req);
     res.status(500).json({ error: 'Transaction failed' });
   } finally {
     client.release();
@@ -54,8 +56,9 @@ const getTransactions = async (req, res) => {
       'SELECT tid, amount, status, a.account_name AS from_account_name, b.account_name AS to_account_name FROM transactions t JOIN accounts a ON t.from_ac_id = a.ac_id JOIN accounts b ON t.to_ac_id = b.ac_id'
     );
     res.json(allTransactions.rows);
+    await logSuccess('Transactions fetched successfully', req);
   } catch (error) {
-    console.error(error.message);
+    await logError(error, req);
     res.status(500).json({ error: 'Unable to fetch transactions' });
   }
 };
@@ -68,8 +71,9 @@ const getTransaction = async (req, res) => {
       return res.status(404).json({ error: 'Transaction not found' });
     }
     res.json(transaction.rows[0]);
+    await logSuccess('Transaction fetched successfully', req);
   } catch (error) {
-    console.error(error.message);
+    await logError(error, req);
     res.status(500).json({ error: 'Unable to fetch transaction' });
   }
 };
@@ -83,8 +87,9 @@ const updateTransaction = async (req, res) => {
       [amount, status, description, id]
     );
     res.json({ message: 'Transaction was updated!' });
+    await logSuccess('Transaction updated successfully', req);
   } catch (error) {
-    console.error(error.message);
+    await logError(error, req);
     res.status(500).json({ error: 'Unable to update transaction' });
   }
 };
@@ -94,8 +99,9 @@ const deleteTransaction = async (req, res) => {
     const { id } = req.params;
     await pool.query('DELETE FROM transactions WHERE tid = $1', [id]);
     res.json({ message: 'Transaction was deleted!' });
+    await logSuccess('Transaction deleted successfully', req);
   } catch (error) {
-    console.error(error.message);
+    await logError(error, req);
     res.status(500).json({ error: 'Unable to delete transaction' });
   }
 };

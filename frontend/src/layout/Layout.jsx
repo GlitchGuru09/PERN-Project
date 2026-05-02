@@ -27,6 +27,8 @@ const Layout = ({ children }) => {
         </div>
       </nav>
 
+      <div className="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+
       {/* Main Content */}
       <main className="container mt-4 flex-grow-1">
         {children}

@@ -1,5 +1,7 @@
 const dotenv = require('dotenv');
 dotenv.config();
+const redis = require('./config/redisClient');
+const { logError } = require('./services/errorLogger');
 
 const express = require('express');
 const cors = require('cors');
@@ -14,6 +16,7 @@ app.use(express.json());
 
 app.use('/transactions', transactionRoutes);
 app.use('/accounts', accountRoutes);
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

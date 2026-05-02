@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
+import showToast from '../../utils/showToast'
 import './style.css'
 
 function Transfer() {
@@ -13,18 +14,11 @@ function Transfer() {
     e.preventDefault();
     try {
       const body = { from_account: Number(selectedFromAccount), to_account: Number(selectedToAccount), amount, description }
-      const response = await axios.post('http://localhost:3000/transactions', body)
-      if (response.status === 400) {
-        alert(response.data.error);
-        return;
-      }
-      else if (response.status === 500) {
-        alert('Server error')
-        return;
-      }
+      await axios.post('http://localhost:3000/transactions', body)
       window.location = '/'
     } catch (error) {
-      console.log(error.message)
+      const message = error?.response?.data?.error || 'Server error'
+      showToast(message, 'danger')
     }
   }
 
@@ -33,7 +27,8 @@ function Transfer() {
       const response = await axios.get('http://localhost:3000/accounts');
       setAccounts(response.data);
     } catch (error) {
-      console.log(error.message)
+      const message = error?.response?.data?.error || 'Server error'
+      showToast(message, 'danger')
     }
   }
 
