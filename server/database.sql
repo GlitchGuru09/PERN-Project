@@ -72,3 +72,28 @@ CREATE TABLE ledger (
         FOREIGN KEY (ac_id) REFERENCES accounts(ac_id)
         ON DELETE CASCADE
 );
+
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  role VARCHAR(50) NOT NULL,
+  is_active BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE accounts
+ADD COLUMN user_id INT REFERENCES users(id);
+
+CREATE TABLE account_users (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id),
+  account_id INT REFERENCES accounts(ac_id),
+  role VARCHAR(50) NOT NULL
+);
+
+ALTER TABLE transactions
+ADD COLUMN created_by INT REFERENCES users(id);
+
+ALTER TABLE ledger
+ADD COLUMN user_id INT REFERENCES users(id);
